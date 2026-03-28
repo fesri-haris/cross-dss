@@ -2,11 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import { systemSettings } from '../data/hospitalData';
 
 const validUsers = [
-  { username:'kolonel.romli', password:'ikhi2026!', ...systemSettings.users[0] },
-  { username:'mayor.sari', password:'ikhi2026!', ...systemSettings.users[1] },
-  { username:'kapten.budi', password:'ikhi2026!', ...systemSettings.users[2] },
-  { username:'lettu.ahmad', password:'ikhi2026!', ...systemSettings.users[3] },
-  { username:'serka.rini', password:'ikhi2026!', ...systemSettings.users[4] },
+  { username: 'kolonel.romli', password: 'ikhi2026!', ...systemSettings.users[0] },
+  { username: 'mayor.sari', password: 'ikhi2026!', ...systemSettings.users[1] },
+  { username: 'kapten.budi', password: 'ikhi2026!', ...systemSettings.users[2] },
+  { username: 'lettu.ahmad', password: 'ikhi2026!', ...systemSettings.users[3] },
+  { username: 'serka.rini', password: 'ikhi2026!', ...systemSettings.users[4] },
 ];
 
 export default function LoginPage({ onLogin }) {
@@ -198,7 +198,7 @@ export default function LoginPage({ onLogin }) {
             </button>
 
             <div className="login-hint">
-              <span>💡 Demo: <code>kolonel.romli</code> / <code>ikhi2026!</code></span>
+              <span>💡 Demo: <code>hubungi</code> / <code>admin</code></span>
             </div>
           </form>
         )}
