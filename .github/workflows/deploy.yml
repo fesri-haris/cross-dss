@@ -6,6 +6,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node.js
@@ -22,5 +24,7 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./dist/ # Folder hasil build Vite
-          server-dir: / # Relatif terhadap directory akun FTP
+          local-dir: ./dist/
+          server-dir: /
+          port: 21
+          state-name: .ftp-deploy-sync.json # Untuk tracking file yang berubah
