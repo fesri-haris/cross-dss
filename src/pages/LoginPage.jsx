@@ -198,7 +198,7 @@ export default function LoginPage({ onLogin }) {
             </button>
 
             <div className="login-hint">
-              <span>💡 Demo: <code>hubungi</code> / <code>admin</code></span>
+              <span>💡 Demo: <code>hubungi</code> - <code>admin</code></span>
             </div>
           </form>
         )}
@@ -242,7 +242,7 @@ export default function LoginPage({ onLogin }) {
         {/* Footer */}
         <div className="login-footer">
           <p>© 2026 Kementerian Pertahanan Republik Indonesia</p>
-          <p>CLASSIFIED — Untuk Kalangan Terbatas</p>
+          <p>CLASSIFIED — Akses Terbatas</p>
         </div>
       </div>
     </div>
