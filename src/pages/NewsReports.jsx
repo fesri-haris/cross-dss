@@ -3,8 +3,30 @@ import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, PointElement,
 import { Bar, Line, Doughnut } from 'react-chartjs-2';
 import { crawledNews, newsCategories, sentimentSummary, sentimentMonthly, sentimentByCategory, topKeywords, reportTemplates, timeRangeOptions, recentGeneratedReports, dssReportData } from '../data/newsData';
 import { hospitals, ikuCategories } from '../data/hospitalData';
+import {
+  dailyBMHP, monthlyAccumulation, bluCalculations, budgetProjections, validityScores,
+  getNationalTotals, bmhpCategories, paymentSources, budgetMonthLabels,
+  bluCategoryLabels, projectionCategoryLabels,
+} from '../data/budgetData';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, ArcElement, Filler, Tooltip, Legend);
+
+// Smart currency formatter — input value is in JUTA RUPIAH
+// 1 Miliar = 1.000 Juta, 1 Triliun = 1.000.000 Juta
+const fmtBudget = (v) => {
+  if (v >= 1000000) return `Rp ${(v / 1000000).toFixed(2)} Triliun`;
+  if (v >= 10000) return `Rp ${(v / 1000).toFixed(1)} Miliar`;
+  if (v >= 1000) return `Rp ${(v / 1000).toFixed(2)} Miliar`;
+  if (v >= 1) return `Rp ${v.toLocaleString('id-ID')} Juta`;
+  return 'Rp 0';
+};
+// Short format for table cells — input value is in JUTA RUPIAH
+const fmtBudgetShort = (v) => {
+  if (v >= 1000000) return `${(v / 1000000).toFixed(2)} T`;
+  if (v >= 10000) return `${(v / 1000).toFixed(1)} M`;
+  if (v >= 1000) return `${(v / 1000).toFixed(2)} M`;
+  return `${v.toLocaleString('id-ID')} Jt`;
+};
 
 const sentColors = { positif:'#10b981', netral:'#f59e0b', negatif:'#ef4444' };
 const sentIcons = { positif:'🟢', netral:'🟡', negatif:'🔴' };
@@ -55,7 +77,7 @@ export default function NewsReports() {
   const [timeRange, setTimeRange] = useState('monthly');
   const [dateFrom, setDateFrom] = useState('2025-09-21');
   const [dateTo, setDateTo] = useState('2026-03-01');
-  const [selectedTemplates, setSelectedTemplates] = useState(['kesiapan','iku15','logistik','bor','sdm','epidemiologi']);
+  const [selectedTemplates, setSelectedTemplates] = useState(['kesiapan','iku15','logistik','bor','sdm','epidemiologi','anggaran']);
   const [generating, setGenerating] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const reportRef = useRef(null);
@@ -97,6 +119,7 @@ export default function NewsReports() {
     ]
   }), []);
 
+  const budgetNational = useMemo(() => getNationalTotals(), []);
   const reportContent = useMemo(() => generateReportContent(selectedTemplates, timeRange, dateFrom, dateTo), [selectedTemplates, timeRange, dateFrom, dateTo]);
 
   const handleGeneratePDF = async () => {
@@ -396,12 +419,136 @@ export default function NewsReports() {
                           </div>
                         </div>
                       )}
+
+                      {/* ═══ DEDICATED ANGGARAN DATA SECTION ═══ */}
+                      {s.id === 'anggaran' && (
+                        <div className="nr-rps-anggaran-detail">
+                          {/* KPI Summary Cards */}
+                          <div className="nr-rps-anggaran-kpis">
+                            <div className="nr-rps-ang-kpi" style={{ borderLeftColor: '#3b82f6' }}>
+                              <span className="nr-rps-ang-kpi-icon">🏥</span>
+                              <div>
+                                <span className="nr-rps-ang-kpi-label">Konsumsi BMHP Harian</span>
+                                <span className="nr-rps-ang-kpi-value">{fmtBudget(budgetNational.totalBMHPHarian)}</span>
+                                <span className="nr-rps-ang-kpi-sub">BPJS {Math.round(budgetNational.totalBMHPHarianBPJS / budgetNational.totalBMHPHarian * 100)}% • Asuransi {Math.round(budgetNational.totalBMHPHarianAsuransi / budgetNational.totalBMHPHarian * 100)}% • Mandiri {Math.round(budgetNational.totalBMHPHarianMandiri / budgetNational.totalBMHPHarian * 100)}%</span>
+                              </div>
+                            </div>
+                            <div className="nr-rps-ang-kpi" style={{ borderLeftColor: '#10b981' }}>
+                              <span className="nr-rps-ang-kpi-icon">📊</span>
+                              <div>
+                                <span className="nr-rps-ang-kpi-label">Akumulasi Tahunan</span>
+                                <span className="nr-rps-ang-kpi-value">{fmtBudget(budgetNational.totalAkumulasiTahunan)}</span>
+                                <span className="nr-rps-ang-kpi-sub">17 RS • 12 Bulan</span>
+                              </div>
+                            </div>
+                            <div className="nr-rps-ang-kpi" style={{ borderLeftColor: '#f59e0b' }}>
+                              <span className="nr-rps-ang-kpi-icon">🧮</span>
+                              <div>
+                                <span className="nr-rps-ang-kpi-label">Alokasi BLU (30%)</span>
+                                <span className="nr-rps-ang-kpi-value">{fmtBudget(budgetNational.totalBLU)}</span>
+                                <span className="nr-rps-ang-kpi-sub">Realisasi: {budgetNational.pctRealisasiBLU}% terserap</span>
+                              </div>
+                            </div>
+                            <div className="nr-rps-ang-kpi" style={{ borderLeftColor: '#8b5cf6' }}>
+                              <span className="nr-rps-ang-kpi-icon">💰</span>
+                              <div>
+                                <span className="nr-rps-ang-kpi-label">Proyeksi Anggaran 2027</span>
+                                <span className="nr-rps-ang-kpi-value">{fmtBudget(budgetNational.totalPengajuan2027)}</span>
+                                <span className="nr-rps-ang-kpi-sub">+{budgetNational.pertumbuhanNasional}% YoY</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Budget Table: 17 RS Summary */}
+                          <div className="nr-rps-anggaran-table-wrap">
+                            <label>📋 Ringkasan Anggaran 17 RS Kemhan:</label>
+                            <table className="nr-rps-ang-table">
+                              <thead>
+                                <tr>
+                                  <th>#</th>
+                                  <th>Rumah Sakit</th>
+                                  <th style={{textAlign:'right'}}>BMHP/Hari (Jt)</th>
+                                  <th style={{textAlign:'right'}}>Akumulasi/Thn (Jt)</th>
+                                  <th style={{textAlign:'right'}}>BLU 30% (Jt)</th>
+                                  <th>% Serap</th>
+                                  <th style={{textAlign:'right'}}>Pengajuan 2027 (Jt)</th>
+                                  <th>Status</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {hospitals.map((h, idx) => {
+                                  const bmhp = dailyBMHP[h.id];
+                                  const monthly = monthlyAccumulation[h.id];
+                                  const blu = bluCalculations[h.id];
+                                  const proj = budgetProjections[h.id];
+                                  return (
+                                    <tr key={h.id}>
+                                      <td style={{color:'#64748b', fontSize:'0.8em'}}>{idx+1}</td>
+                                      <td style={{fontWeight:600, fontSize:'0.85em'}}>{h.name}</td>
+                                      <td style={{textAlign:'right', color:'#3b82f6'}}>{fmtBudgetShort(bmhp.totals.grand)}</td>
+                                      <td style={{textAlign:'right', color:'#10b981'}}>{fmtBudgetShort(monthly.totalYear)}</td>
+                                      <td style={{textAlign:'right', color:'#f59e0b'}}>{fmtBudgetShort(blu.alokasBLU)}</td>
+                                      <td>
+                                        <span style={{color: Number(blu.pctRealisasi) >= 90 ? '#10b981' : '#f59e0b', fontWeight:600, fontSize:'0.85em'}}>{blu.pctRealisasi}%</span>
+                                      </td>
+                                      <td style={{textAlign:'right', fontWeight:700, color:'#D4AF37'}}>{fmtBudgetShort(proj.totalPengajuan)}</td>
+                                      <td>
+                                        <span style={{fontSize:'0.75em', padding:'2px 6px', borderRadius:4, background: proj.statusPengajuan === 'approved' ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)', color: proj.statusPengajuan === 'approved' ? '#10b981' : '#f59e0b'}}>
+                                          {proj.statusPengajuan === 'approved' ? '✅' : '⏳'} {proj.statusPengajuan === 'approved' ? 'Approved' : 'Review'}
+                                        </span>
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                              <tfoot>
+                                <tr style={{fontWeight:700, borderTop:'2px solid rgba(212,175,55,0.3)'}}>
+                                  <td colSpan={2} style={{textAlign:'right', color:'#D4AF37'}}>TOTAL NASIONAL</td>
+                                  <td style={{textAlign:'right', color:'#3b82f6'}}>{fmtBudgetShort(budgetNational.totalBMHPHarian)}</td>
+                                  <td style={{textAlign:'right', color:'#10b981'}}>{fmtBudgetShort(budgetNational.totalAkumulasiTahunan)}</td>
+                                  <td style={{textAlign:'right', color:'#f59e0b'}}>{fmtBudgetShort(budgetNational.totalBLU)}</td>
+                                  <td style={{color:'#10b981'}}>{budgetNational.pctRealisasiBLU}%</td>
+                                  <td style={{textAlign:'right', color:'#D4AF37'}}>{fmtBudgetShort(budgetNational.totalPengajuan2027)}</td>
+                                  <td></td>
+                                </tr>
+                              </tfoot>
+                            </table>
+                          </div>
+
+                          {/* Validitas SIMRS */}
+                          <div className="nr-rps-anggaran-validity">
+                            <label>🔒 Validitas Data SIMRS = Validitas Anggaran 2027:</label>
+                            <div className="nr-rps-ang-validity-cards">
+                              <div className="nr-rps-ang-val-card" style={{borderColor:'#10b981'}}>
+                                <span style={{fontSize:'1.4em'}}>✅</span>
+                                <span style={{fontSize:'1.3em', fontWeight:800, color:'#10b981'}}>{budgetNational.rsValidCount}</span>
+                                <span style={{fontSize:'0.75em', color:'#94a3b8'}}>RS Tervalidasi<br/>(Skor ≥85%)</span>
+                              </div>
+                              <div className="nr-rps-ang-val-card" style={{borderColor:'#f59e0b'}}>
+                                <span style={{fontSize:'1.4em'}}>⚠️</span>
+                                <span style={{fontSize:'1.3em', fontWeight:800, color:'#f59e0b'}}>{budgetNational.rsConditionalCount}</span>
+                                <span style={{fontSize:'0.75em', color:'#94a3b8'}}>RS Bersyarat<br/>(Skor 70-84%)</span>
+                              </div>
+                              <div className="nr-rps-ang-val-card" style={{borderColor:'#ef4444'}}>
+                                <span style={{fontSize:'1.4em'}}>🔴</span>
+                                <span style={{fontSize:'1.3em', fontWeight:800, color:'#ef4444'}}>{budgetNational.rsReviewCount}</span>
+                                <span style={{fontSize:'0.75em', color:'#94a3b8'}}>Perlu Review<br/>(Skor &lt;70%)</span>
+                              </div>
+                              <div className="nr-rps-ang-val-card" style={{borderColor:'#D4AF37'}}>
+                                <span style={{fontSize:'1.4em'}}>📊</span>
+                                <span style={{fontSize:'1.3em', fontWeight:800, color:'#D4AF37'}}>{budgetNational.avgValiditas}%</span>
+                                <span style={{fontSize:'0.75em', color:'#94a3b8'}}>Rata-rata Validitas<br/>Nasional</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
 
                   <div className="nr-rp-footer">
                     <p>Laporan ini dihasilkan secara otomatis oleh IKHI Command Center — RS Kemhan Decision Support System.</p>
-                    <p>Data bersumber dari RS Monitoring, Data Analysis 15 IKU, RFID Tracking, News Crawling & Sentiment Analysis.</p>
+                    <p>Data bersumber dari RS Monitoring, Data Analysis 15 IKU, RFID Tracking, News Crawling & Sentiment Analysis, serta Korelasi Data Operasional & Alokasi Anggaran Kemhan.</p>
                     <p>Periode Laporan: {reportContent.periodRange} | Klasifikasi: RAHASIA — Untuk Kalangan Terbatas</p>
                     <p>© 2026 Kementerian Pertahanan Republik Indonesia.</p>
                   </div>

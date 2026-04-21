@@ -13,12 +13,22 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineEleme
 const forceIcon = { AD: '🟢', AL: '🔵', AU: '🟠' };
 const forceLabel = { AD: 'TNI AD', AL: 'TNI AL', AU: 'TNI AU' };
 
+// Smart currency formatter — input value is in JUTA RUPIAH
+// 1 Miliar = 1.000 Juta, 1 Triliun = 1.000.000 Juta
 const fmtMoney = (v) => {
-  if (v >= 1000000) return `${(v / 1000000).toFixed(1)}T`;
-  if (v >= 1000) return `${(v / 1000).toFixed(1)}M`;
-  return `${v} Jt`;
+  if (v >= 1000000) return `Rp ${(v / 1000000).toFixed(2)} Triliun`;
+  if (v >= 10000) return `Rp ${(v / 1000).toFixed(1)} Miliar`;
+  if (v >= 1000) return `Rp ${(v / 1000).toFixed(2)} Miliar`;
+  if (v >= 1) return `Rp ${v.toLocaleString('id-ID')} Juta`;
+  return 'Rp 0';
 };
-const fmtJuta = (v) => `Rp ${v.toLocaleString('id-ID')} Jt`;
+// Smart auto-scale formatter for table cells — input value is in JUTA RUPIAH
+const fmtJuta = (v) => {
+  if (v >= 1000000) return `Rp ${(v / 1000000).toFixed(2)} T`;
+  if (v >= 10000) return `Rp ${(v / 1000).toFixed(1)} M`;
+  if (v >= 1000) return `Rp ${(v / 1000).toFixed(2)} M`;
+  return `Rp ${v.toLocaleString('id-ID')} Jt`;
+};
 
 const chartBase = {
   responsive: true, maintainAspectRatio: false,

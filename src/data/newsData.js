@@ -368,6 +368,7 @@ export const reportTemplates = [
   { id:'bor', label:'BOR & Efisiensi Operasional', icon:'🛏️', desc:'Bed Occupancy Rate, ALOS, TOI dan indikator efisiensi seluruh RS TNI', color:'#f59e0b' },
   { id:'sdm', label:'SDM & Tenaga Medis', icon:'👨‍⚕️', desc:'Rasio tenaga medis, distribusi spesialis, dan kebutuhan SDM per RS', color:'#06b6d4' },
   { id:'epidemiologi', label:'Epidemiologi & Wabah', icon:'🦠', desc:'Perkembangan penyakit, wabah, dan status kesiagaan RS Kemhan per wilayah', color:'#ef4444' },
+  { id:'anggaran', label:'Anggaran & Alokasi BMHP', icon:'💰', desc:'Korelasi data operasional, konsumsi BMHP, perhitungan BLU, dan proyeksi anggaran 2027', color:'#D4AF37' },
 ];
 
 export const timeRangeOptions = [
@@ -430,6 +431,17 @@ export const dssReportData = {
       detail: 'Tidak ada outbreak baru terdeteksi. Pasien DBD rawat inap: 12 (3 grade III). Monitoring harian sentinel flu: negatif. Kasus COVID-19 stabil: 2 rawat isolasi. TB MDR: 1 kasus baru dirujuk dari RS Tk.III. Screening malaria Yonif Papua: 3 positif Pf dirawat.',
       highlights: ['Tidak ada outbreak baru hari ini', 'Kasus DBD: 12 rawat inap (3 kritis)', 'Sentinel influenza: NEGATIF'],
     },
+    anggaran: {
+      score: 'Rp 684 Juta', status: '✅ Tercatat Real-time', trend: '↑ +2.3% dari kemarin',
+      detail: 'Konsumsi BMHP harian nasional 17 RS: Rp 684 Juta (BPJS 58%, Asuransi 24%, Mandiri 18%). Shift pagi tertinggi (35% total). RSPPN Soedirman tertinggi: Rp 82 Juta/hari. Seluruh data tervalidasi SIMRS real-time. Rasio efisiensi pengeluaran/pendapatan nasional: 29.2%. BLU realisasi: 92.4% terserap.',
+      highlights: ['Konsumsi BMHP harian: Rp 684 Juta (17 RS)', 'BPJS dominasi 58% sumber pembayaran', 'Shift pagi tertinggi: 35% dari total harian', 'Rasio efisiensi 29.2% — dalam batas wajar'],
+      rsComparison: [
+        { rs: 'RSPPN Soedirman', score: 95, status: 'Rp 82 Jt/hari' },
+        { rs: 'RSPAD Gatot Soebroto', score: 92, status: 'Rp 98 Jt/hari' },
+        { rs: 'RSAL Mintohardjo', score: 88, status: 'Rp 72 Jt/hari' },
+        { rs: 'RSAU Esnawan', score: 85, status: 'Rp 65 Jt/hari' },
+      ]
+    },
   },
 
   weekly: {
@@ -471,6 +483,18 @@ export const dssReportData = {
       score: 'Waspada', status: '🟡 DBD Meningkat', trend: '↑ Kasus naik 15%',
       detail: 'Kasus DBD baru minggu ini: 34 (naik 15% dari minggu lalu). Kasus kritis (Grade III-IV): 5. Kematian DBD: 1 (RSAD di Semarang). ISPA meningkat di 3 RS. 4 kasus flu H1N1 terdeteksi — sentinel monitoring ditingkatkan. Kasus TB baru: 8 (3 MDR-TB).',
       highlights: ['ALERT: Kasus DBD naik 15% — 34 kasus baru', '1 kematian DBD di RSAD Semarang', '4 kasus flu H1N1 — sentinel monitoring aktif'],
+    },
+    anggaran: {
+      score: 'Rp 4.79 Milyar', status: '✅ On Track', trend: '↑ +1.8% dari minggu lalu',
+      detail: 'Akumulasi BMHP mingguan 17 RS: Rp 4,79 Milyar. Breakdown: BPJS Rp 2,78 M (58%), Asuransi Rp 1,15 M (24%), Mandiri Rp 862 Jt (18%). Rata-rata harian: Rp 684 Juta. RSPAD Gatot Soebroto tertinggi: Rp 686 Juta/minggu. RS Type D terendah: Rp 98 Juta/minggu. Alokasi BLU terpantau — 14/17 RS realisasi di atas 85%.',
+      highlights: ['Akumulasi BMHP mingguan: Rp 4,79 Milyar', 'RSPAD Gatot Soebroto tertinggi: Rp 686 Juta/minggu', '14 dari 17 RS realisasi BLU > 85%', '3 RS perlu percepatan realisasi BLU'],
+      rsComparison: [
+        { rs: 'RSPAD Gatot Soebroto', score: 93, status: 'Rp 686 Jt/mggu' },
+        { rs: 'RSPPN Soedirman', score: 91, status: 'Rp 574 Jt/mggu' },
+        { rs: 'RSAL Mintohardjo', score: 87, status: 'Rp 504 Jt/mggu' },
+        { rs: 'RSAU Esnawan', score: 84, status: 'Rp 455 Jt/mggu' },
+        { rs: 'RSAU dr. Djamil', score: 62, status: 'Rp 98 Jt/mggu' },
+      ]
     },
   },
 
@@ -515,6 +539,20 @@ export const dssReportData = {
       score: 'Waspada', status: '🟡 DBD Meningkat', trend: '↑ Kasus naik 40%',
       detail: 'Kasus DBD meningkat 40% di 5 provinsi (Jateng, Jatim, Bali, NTB, Sulsel). RS TNI siaga penuh dengan penambahan 200 TT darurat. Kasus penyakit penyelaman stabil (12 kasus/bulan). Total kasus infeksi nosokomial: 18 (target <15). Kematian karena DBD: 3. TB baru: 28 kasus (8 MDR-TB).',
       highlights: ['ALERT: DBD naik 40% di 5 provinsi', '200 tempat tidur darurat ditambahkan', '3 kematian karena DBD — semua di RS tipe C', 'Infeksi nosokomial 18 kasus — di atas target 15'],
+    },
+    anggaran: {
+      score: 'Rp 19,4 Milyar', status: '✅ Sesuai Rencana', trend: '↑ +3.2% dari bulan lalu',
+      detail: 'Akumulasi BMHP bulanan nasional Maret 2026: Rp 19,4 Milyar dari 17 RS. BPJS: Rp 11,3 M (58%), Asuransi: Rp 4,7 M (24%), Mandiri: Rp 3,5 M (18%). Pendapatan total 17 RS: Rp 56,7 Milyar. Alokasi BLU (30%): Rp 17,0 Milyar — realisasi 91.8%. Proyeksi pengajuan anggaran 2027: Rp 252 Milyar (+8.2% dari realisasi 2026). 15/17 RS status "approved", 2 RS "under review" (RSAU dr. Djamil & RSAL dr. Oepomo).',
+      highlights: ['BMHP bulanan nasional: Rp 19,4 Milyar', 'Pendapatan total 17 RS: Rp 56,7 Milyar', 'Realisasi BLU: 91.8% terserap', 'Proyeksi anggaran 2027: Rp 252 Milyar (+8.2% YoY)', '15/17 RS pengajuan approved, 2 under review'],
+      rsComparison: [
+        { rs: 'RSPAD Gatot Soebroto', score: 95, status: 'Rp 2,97 M/bln' },
+        { rs: 'RSPPN Soedirman', score: 93, status: 'Rp 2,49 M/bln' },
+        { rs: 'RSAL Mintohardjo', score: 89, status: 'Rp 2,18 M/bln' },
+        { rs: 'RSAU Esnawan', score: 86, status: 'Rp 1,97 M/bln' },
+        { rs: 'RSAL dr. Ramelan', score: 82, status: 'Rp 1,68 M/bln' },
+        { rs: 'RSAD Dustira', score: 80, status: 'Rp 1,52 M/bln' },
+        { rs: 'RSAU dr. Djamil', score: 58, status: 'Rp 425 Jt/bln ⚠️' },
+      ]
     },
   },
 
@@ -561,6 +599,21 @@ export const dssReportData = {
       detail: 'Rekapitulasi 2025: Total kasus DBD: 1.245 (2024: 1.480, -15.8%). TB: 342 kasus baru (47 MDR). Penyakit penyelaman: 148 kasus. Infeksi nosokomial rate: 1.8% (target <2%). COVID-19: 287 kasus rawat isolasi (0 fatalities). Malaria di RS perbatasan: 89 kasus. Wabah yang berhasil dicegah: 4 cluster.',
       highlights: ['Kasus DBD turun 15.8% dari 2024', 'Zero fatality COVID-19 di RS TNI 2025', 'Infeksi nosokomial 1.8% — di bawah target 2%', '4 cluster wabah berhasil dicegah dini'],
     },
+    anggaran: {
+      score: 'Rp 232 Milyar', status: 'Realisasi 78%', trend: '↑ +12% dari 2024',
+      detail: 'Total pengeluaran BMHP tahunan 2025: Rp 232 Milyar (dari alokasi Rp 298 Milyar, realisasi 78%). Pendapatan total 17 RS: Rp 680 Milyar. Alokasi BLU (30%): Rp 204 Milyar — realisasi 89.5%. Proyeksi pengajuan anggaran 2027: Rp 252 Milyar (+8.6% dari 2026). Pertumbuhan YoY pengeluaran BMHP: +12%. Historis: 2024 (Rp 207 M), 2025 (Rp 232 M), 2026 est. (Rp 240 M). RS Type A rata-rata: Rp 24 M/bulan. RS Type D: Rp 4,2 M/bulan. Efisiensi meningkat 3.2% berkat implementasi SIMRS v4.2.',
+      highlights: ['Total BMHP 2025: Rp 232 Milyar (realisasi 78%)', 'Pendapatan 17 RS: Rp 680 Milyar', 'BLU realisasi: 89.5% terserap', 'Pertumbuhan BMHP: +12% YoY', 'Proyeksi 2027: Rp 252 Milyar (+8.6%)'],
+      rsComparison: [
+        { rs: 'RSPAD Gatot Soebroto', score: 94, status: 'Rp 35,6 M/thn' },
+        { rs: 'RSPPN Soedirman', score: 92, status: 'Rp 29,9 M/thn' },
+        { rs: 'RSAL Mintohardjo', score: 88, status: 'Rp 26,2 M/thn' },
+        { rs: 'RSAU Esnawan', score: 85, status: 'Rp 23,6 M/thn' },
+        { rs: 'RSAL dr. Ramelan', score: 81, status: 'Rp 20,1 M/thn' },
+        { rs: 'RSAD Dustira', score: 79, status: 'Rp 18,2 M/thn' },
+        { rs: 'RSAD Soepraoen', score: 77, status: 'Rp 17,1 M/thn' },
+        { rs: 'RSAU dr. Djamil', score: 55, status: 'Rp 5,1 M/thn ⚠️' },
+      ]
+    },
   },
 
   custom: {
@@ -603,6 +656,19 @@ export const dssReportData = {
       score: 'Waspada', status: '🟡 Dinamis', trend: 'Fluktuatif',
       detail: 'Dinamika epidemiologi 162 hari: DBD surge Oktober-November 2025 (peak 180 kasus/minggu), mereda Desember. Second wave Jan-Feb 2026. Total DBD: 892 kasus, 12 kematian. TB: 189 kasus baru (28 MDR). Penyakit penyelaman: 82 kasus. COVID-19: 145 kasus isolasi (0 fatalities). Outbreak dicegah: 6 cluster.',
       highlights: ['DBD: 892 kasus, 12 kematian selama periode', 'Dua gelombang DBD: Okt-Nov 2025 dan Jan-Feb 2026', 'Zero COVID fatality sepanjang 162 hari', '6 cluster wabah berhasil dicegah dini'],
+    },
+    anggaran: {
+      score: 'Rp 119 Milyar', status: 'On Track', trend: '↑ Tren positif',
+      detail: 'Analisis 162 hari anggaran operasional: Total BMHP Rp 119 Milyar dari 17 RS. Breakdown: BPJS Rp 69 M (58%), Asuransi Rp 28,6 M (24%), Mandiri Rp 21,4 M (18%). Pendapatan total: Rp 348 Milyar. BLU (30%): Rp 104 Milyar — realisasi 90.2%. Tren efisiensi membaik dari 31.4% → 29.2% (pengeluaran/pendapatan). Implementasi SIMRS v4.2 menurunkan biaya BMHP rata-rata 2.8% per RS. Proyeksi pengajuan 2027 berdasarkan data 162 hari: Rp 252 Milyar (termasuk +5% surplus).',
+      highlights: ['BMHP 162 hari: Rp 119 Milyar', 'Efisiensi membaik: 31.4% → 29.2%', 'BLU realisasi: 90.2% terserap', 'SIMRS v4.2 hemat 2.8% biaya BMHP per RS', 'Proyeksi 2027: Rp 252 Milyar (incl. +5% surplus)'],
+      rsComparison: [
+        { rs: 'RSPAD Gatot Soebroto', score: 93, status: 'Rp 19,3 M/periode' },
+        { rs: 'RSPPN Soedirman', score: 91, status: 'Rp 16,2 M/periode' },
+        { rs: 'RSAL Mintohardjo', score: 87, status: 'Rp 14,2 M/periode' },
+        { rs: 'RSAU Esnawan', score: 84, status: 'Rp 12,8 M/periode' },
+        { rs: 'RSAD Dustira', score: 80, status: 'Rp 9,9 M/periode' },
+        { rs: 'RSAU dr. Djamil', score: 57, status: 'Rp 2,7 M/periode ⚠️' },
+      ]
     },
   },
 };
