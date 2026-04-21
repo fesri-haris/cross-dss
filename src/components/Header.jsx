@@ -8,6 +8,7 @@ const navItems = [
   { id: 'rfid', label: 'RFID Tracking', path: '/rfid', icon: '📡', desc: 'Pelacakan Aset & Pasien' },
   { id: 'analysis', label: 'Data Analysis', path: '/analysis', icon: '📊', desc: '15 Parameter Kinerja' },
   { id: 'news', label: 'News & Reports', path: '/news', icon: '📰', desc: 'Berita & Laporan DSS' },
+  { id: 'budget', label: 'Anggaran', path: '/anggaran', icon: '💰', desc: 'Korelasi Data & Anggaran' },
   { id: 'admin', label: 'Admin Settings', path: '/admin', icon: '⚙️', desc: 'Pengaturan Sistem' },
 ];
 

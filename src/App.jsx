@@ -9,6 +9,7 @@ import RFIDTracking from './pages/RFIDTracking';
 import DataAnalysis from './pages/DataAnalysis';
 import NewsReports from './pages/NewsReports';
 import AdminSettings from './pages/AdminSettings';
+import BudgetAnggaran from './pages/BudgetAnggaran';
 import './index.css';
 
 function App() {
@@ -47,6 +48,7 @@ function App() {
               <Route path="/rfid" element={<RFIDTracking />} />
               <Route path="/analysis" element={<DataAnalysis />} />
               <Route path="/news" element={<NewsReports />} />
+              <Route path="/anggaran" element={<BudgetAnggaran />} />
               <Route path="/admin" element={<AdminSettings />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
