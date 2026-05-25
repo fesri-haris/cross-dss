@@ -1,5 +1,5 @@
 {
-  "name": "rs-kemhan",
+  "name": "cross-dss",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@turf/turf": "^7.3.5",
     "chart.js": "^4.5.1",
     "gsap": "^3.14.2",
     "html2canvas": "^1.4.1",

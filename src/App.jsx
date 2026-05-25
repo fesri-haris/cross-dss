@@ -4,36 +4,32 @@ import { ThemeProvider } from './context/ThemeContext';
 import Header from './components/Header';
 import LoginPage from './pages/LoginPage';
 import DashboardGIS from './pages/DashboardGIS';
-import RSMonitoring from './pages/RSMonitoring';
-import RFIDTracking from './pages/RFIDTracking';
-import DataAnalysis from './pages/DataAnalysis';
-import NewsReports from './pages/NewsReports';
-import AdminSettings from './pages/AdminSettings';
-import BudgetAnggaran from './pages/BudgetAnggaran';
+import KomoditasMonitoring from './pages/KomoditasMonitoring';
+import OverlapAnalysis from './pages/OverlapAnalysis';
+import DSSEngine from './pages/DSSEngine';
+import SocialSurveillance from './pages/SocialSurveillance';
+import ReportBuilder from './pages/ReportBuilder';
+import SystemConfig from './pages/SystemConfig';
 import './index.css';
 
 function App() {
   const [authUser, setAuthUser] = useState(() => {
-    const saved = sessionStorage.getItem('ikhi-user');
+    const saved = sessionStorage.getItem('cross-dss-user');
     return saved ? JSON.parse(saved) : null;
   });
 
   const handleLogin = (user) => {
     setAuthUser(user);
-    sessionStorage.setItem('ikhi-user', JSON.stringify(user));
+    sessionStorage.setItem('cross-dss-user', JSON.stringify(user));
   };
 
   const handleLogout = () => {
     setAuthUser(null);
-    sessionStorage.removeItem('ikhi-user');
+    sessionStorage.removeItem('cross-dss-user');
   };
 
   if (!authUser) {
-    return (
-      <ThemeProvider>
-        <LoginPage onLogin={handleLogin} />
-      </ThemeProvider>
-    );
+    return <ThemeProvider><LoginPage onLogin={handleLogin} /></ThemeProvider>;
   }
 
   return (
@@ -44,12 +40,12 @@ function App() {
           <main className="main-content">
             <Routes>
               <Route path="/" element={<DashboardGIS />} />
-              <Route path="/monitoring" element={<RSMonitoring />} />
-              <Route path="/rfid" element={<RFIDTracking />} />
-              <Route path="/analysis" element={<DataAnalysis />} />
-              <Route path="/news" element={<NewsReports />} />
-              <Route path="/anggaran" element={<BudgetAnggaran />} />
-              <Route path="/admin" element={<AdminSettings />} />
+              <Route path="/komoditas" element={<KomoditasMonitoring />} />
+              <Route path="/overlap" element={<OverlapAnalysis />} />
+              <Route path="/dss" element={<DSSEngine />} />
+              <Route path="/surveillance" element={<SocialSurveillance />} />
+              <Route path="/laporan" element={<ReportBuilder />} />
+              <Route path="/konfigurasi" element={<SystemConfig />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>

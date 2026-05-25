@@ -1,0 +1,222 @@
+// ============================================================
+// DSS Engine Data — Cross-DSS
+// AHP Weights, Yield Model, Tree Counting, Change Detection
+// ============================================================
+
+export const ahpCriteria = [
+  { id: 'eco_impact', name: 'Dampak Ekologis', weight: 0.35, icon: '🌳', description: 'Tingkat kerusakan ekosistem, biodiversitas, dan tutupan hutan akibat aktivitas pemanfaatan lahan' },
+  { id: 'customary_tenure', name: 'Hak Ulayat Adat', weight: 0.25, icon: '🏘️', description: 'Keberadaan dan kekuatan klaim hak tanah ulayat masyarakat adat di zona evaluasi' },
+  { id: 'economic_yield', name: 'Hasil Ekonomi', weight: 0.25, icon: '💰', description: 'Kontribusi ekonomi terhadap PDB regional, lapangan kerja, dan nilai ekspor komoditas' },
+  { id: 'overlap_index', name: 'Indeks Tumpang Tindih', weight: 0.15, icon: '⚠️', description: 'Tingkat keparahan konflik spasial lintas sektor di zona evaluasi' },
+];
+
+export const ahpZoneScores = [
+  {
+    zone_id: 'ZONE-MRK-001',
+    zone_name: 'Klaster Wanam — HGU Sawit vs Food Estate',
+    province: 'Papua Selatan',
+    kabupaten: 'Merauke',
+    scores: { eco_impact: 0.72, customary_tenure: 0.85, economic_yield: 0.68, overlap_index: 0.91 },
+    sustainability_score: 0.38,
+    recommendation: 'REVISI ZONASI',
+    recommendation_detail: 'Area memiliki konflik tinggi antara HGU sawit eksisting dan rencana food estate. Direkomendasikan negosiasi pelepasan sebagian HGU untuk sawah baru dengan kompensasi lahan alternatif.',
+    risk_level: 'TINGGI',
+  },
+  {
+    zone_id: 'ZONE-MRK-002',
+    zone_name: 'Klaster Ilwayab — Tebu vs Hutan Sagu',
+    province: 'Papua Selatan',
+    kabupaten: 'Merauke',
+    scores: { eco_impact: 0.65, customary_tenure: 0.58, economic_yield: 0.82, overlap_index: 0.45 },
+    sustainability_score: 0.55,
+    recommendation: 'LANJUTKAN DENGAN MITIGASI',
+    recommendation_detail: 'Perkebunan tebu dapat dilanjutkan dengan buffer zone 2km dari kawasan rawa sagu komunal dan program agroforestri pendamping.',
+    risk_level: 'SEDANG',
+  },
+  {
+    zone_id: 'ZONE-BDG-001',
+    zone_name: 'Boven Digoel — IUP Kuarsa vs Hutan Ulayat Awyu',
+    province: 'Papua Selatan',
+    kabupaten: 'Boven Digoel',
+    scores: { eco_impact: 0.88, customary_tenure: 0.92, economic_yield: 0.35, overlap_index: 0.78 },
+    sustainability_score: 0.22,
+    recommendation: 'HENTIKAN & EVALUASI',
+    recommendation_detail: 'IUP kuarsa sangat tidak berkelanjutan karena dampak ekologis tinggi dan pelanggaran hak ulayat Suku Awyu. Direkomendasikan pencabutan izin.',
+    risk_level: 'KRITIS',
+  },
+  {
+    zone_id: 'ZONE-MRK-003',
+    zone_name: 'Klaster Kurik — Peternakan Sapi Terpadu',
+    province: 'Papua Selatan',
+    kabupaten: 'Merauke',
+    scores: { eco_impact: 0.32, customary_tenure: 0.25, economic_yield: 0.75, overlap_index: 0.15 },
+    sustainability_score: 0.78,
+    recommendation: 'LANJUTKAN',
+    recommendation_detail: 'Zona peternakan sapi terpadu memiliki konflik minimal dan dampak ekologis rendah. Program dapat dipercepat.',
+    risk_level: 'RENDAH',
+  },
+  {
+    zone_id: 'ZONE-MPP-001',
+    zone_name: 'Mappi — IUP Nikel vs Kawasan Hutan',
+    province: 'Papua Selatan',
+    kabupaten: 'Mappi',
+    scores: { eco_impact: 0.78, customary_tenure: 0.45, economic_yield: 0.72, overlap_index: 0.55 },
+    sustainability_score: 0.42,
+    recommendation: 'REVISI ZONASI',
+    recommendation_detail: 'IUP nikel perlu disesuaikan batasnya agar tidak memasuki kawasan hutan lindung dan zona buffer sungai.',
+    risk_level: 'TINGGI',
+  },
+];
+
+export const treeCountingResults = [
+  {
+    area_id: 'TC-001',
+    area_name: 'Blok A — PT. Merauke Rayon Jaya',
+    total_trees: 245800,
+    density_per_ha: 132,
+    classification: {
+      tbm: { count: 28500, persen: 11.6, avgAge: 2.1 },
+      tm_muda: { count: 125400, persen: 51.0, avgAge: 8.5 },
+      tm_dewasa: { count: 72300, persen: 29.4, avgAge: 15.2 },
+      replanting: { count: 19600, persen: 8.0, avgAge: 27.8 },
+    },
+    health_index: 0.82,
+    estimated_yield_ton: 42800,
+    canopy_coverage_persen: 78.5,
+    last_scan: '2026-05-20',
+  },
+  {
+    area_id: 'TC-002',
+    area_name: 'Blok B — PT. Berkat Cipta Abadi',
+    total_trees: 318000,
+    density_per_ha: 131,
+    classification: {
+      tbm: { count: 15900, persen: 5.0, avgAge: 1.8 },
+      tm_muda: { count: 98580, persen: 31.0, avgAge: 7.2 },
+      tm_dewasa: { count: 165360, persen: 52.0, avgAge: 14.8 },
+      replanting: { count: 38160, persen: 12.0, avgAge: 26.5 },
+    },
+    health_index: 0.76,
+    estimated_yield_ton: 55200,
+    canopy_coverage_persen: 82.3,
+    last_scan: '2026-05-18',
+  },
+  {
+    area_id: 'TC-003',
+    area_name: 'Blok C — PT. Korindo Papua Plantations',
+    total_trees: 417300,
+    density_per_ha: 130,
+    classification: {
+      tbm: { count: 41730, persen: 10.0, avgAge: 2.5 },
+      tm_muda: { count: 104325, persen: 25.0, avgAge: 6.8 },
+      tm_dewasa: { count: 208650, persen: 50.0, avgAge: 16.5 },
+      replanting: { count: 62595, persen: 15.0, avgAge: 28.2 },
+    },
+    health_index: 0.71,
+    estimated_yield_ton: 78500,
+    canopy_coverage_persen: 85.1,
+    last_scan: '2026-05-15',
+  },
+];
+
+export const changeDetectionResults = [
+  {
+    detection_id: 'CD-001',
+    location: 'Selatan Blok C — PT. Korindo',
+    coordinates: [140.55, -8.28],
+    detected_date: '2026-05-10',
+    change_type: 'UNPERMITTED_CLEARING',
+    area_ha: 450,
+    before_class: 'Hutan Sekunder',
+    after_class: 'Lahan Terbuka',
+    confidence: 0.94,
+    severity: 'CRITICAL',
+    within_permit: false,
+    status: 'Investigasi',
+    satellite: 'Sentinel-2',
+    notes: 'Pembukaan lahan di luar batas poligon HGU, terdeteksi konversi hutan sekunder',
+  },
+  {
+    detection_id: 'CD-002',
+    location: 'Timur Laut Blok A — Ekspansi',
+    coordinates: [140.32, -8.08],
+    detected_date: '2026-04-28',
+    change_type: 'PERMITTED_EXPANSION',
+    area_ha: 280,
+    before_class: 'Semak Belukar',
+    after_class: 'Perkebunan Sawit Muda',
+    confidence: 0.88,
+    severity: 'LOW',
+    within_permit: true,
+    status: 'Terverifikasi',
+    satellite: 'Landsat-9',
+    notes: 'Ekspansi dalam batas HGU yang diizinkan',
+  },
+  {
+    detection_id: 'CD-003',
+    location: 'Boven Digoel — Area IUP',
+    coordinates: [140.65, -6.95],
+    detected_date: '2026-05-05',
+    change_type: 'UNPERMITTED_CLEARING',
+    area_ha: 180,
+    before_class: 'Hutan Primer',
+    after_class: 'Lahan Terbuka (Eksplorasi)',
+    confidence: 0.91,
+    severity: 'CRITICAL',
+    within_permit: true,
+    status: 'Pelanggaran AMDAL',
+    satellite: 'Sentinel-2',
+    notes: 'Pembukaan lahan di area IUP eksplorasi melampaui batas izin AMDAL',
+  },
+  {
+    detection_id: 'CD-004',
+    location: 'Kurik — Area Food Estate',
+    coordinates: [140.40, -8.38],
+    detected_date: '2026-04-15',
+    change_type: 'PERMITTED_DEVELOPMENT',
+    area_ha: 1200,
+    before_class: 'Padang Rumput',
+    after_class: 'Konstruksi Feedlot',
+    confidence: 0.95,
+    severity: 'INFO',
+    within_permit: true,
+    status: 'Sesuai Rencana',
+    satellite: 'PlanetScope',
+    notes: 'Pembangunan infrastruktur peternakan sapi terpadu sesuai masterplan PSN',
+  },
+];
+
+export const yieldPredictions = {
+  kelapa_sawit: {
+    nasional: { current_ton: 51800000, predicted_ton: 53200000, growth_persen: 2.7 },
+    papua_selatan: { current_ton: 236500, predicted_ton: 285000, growth_persen: 20.5 },
+    risk_factors: [
+      { factor: 'Tumpang Tindih Lahan', impact_persen: -8.5, description: 'Konflik spasial mengurangi area produktif' },
+      { factor: 'Usia Tanaman Tua', impact_persen: -5.2, description: 'Perlu program replanting masif' },
+      { factor: 'Karhutla', impact_persen: -3.1, description: 'Kebakaran lahan mengurangi produktivitas' },
+      { factor: 'Ekspansi Baru', impact_persen: 15.8, description: 'TBM yang mulai berproduksi' },
+    ],
+  },
+  tebu: {
+    target_ton: 7000000,
+    realisasi_ton: 2400000,
+    predicted_2027_ton: 4800000,
+    gula_kristal_ton: 336000,
+  },
+  padi: {
+    target_ton: 1260000,
+    realisasi_ton: 263000,
+    predicted_2027_ton: 756000,
+    surplus_beras_ton: 189000,
+  },
+};
+
+export const reportTemplates = [
+  { id: 'audit_overlap', name: 'Laporan Audit Tumpang Tindih Lahan', icon: '⚠️', sections: ['peta_overlap', 'tabel_konflik', 'rekomendasi_dss', 'timeline_berita'] },
+  { id: 'kepatuhan_lingkungan', name: 'Laporan Kepatuhan Lingkungan (ISPO/RSPO)', icon: '🌿', sections: ['skor_kepatuhan', 'change_detection', 'hotspot_karhutla', 'sensor_gambut'] },
+  { id: 'progress_psn', name: 'Laporan Progres PSN Food Estate', icon: '🌾', sections: ['kpi_psn', 'peta_klaster', 'produksi_komoditas', 'infrastruktur'] },
+  { id: 'situasi_sosial', name: 'Laporan Situasi Sosial Papua Selatan', icon: '👥', sections: ['sentimen_analisis', 'peta_konflik', 'entity_suku', 'rekomendasi'] },
+  { id: 'executive_summary', name: 'Ringkasan Eksekutif Cross-Sectoral', icon: '📊', sections: ['overview_nasional', 'focus_papua', 'dss_scoring', 'rekomendasi_kebijakan'] },
+];
+
+export default { ahpCriteria, ahpZoneScores, treeCountingResults, changeDetectionResults, yieldPredictions, reportTemplates };

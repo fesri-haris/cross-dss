@@ -4,13 +4,13 @@ const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
   const [isDark, setIsDark] = useState(() => {
-    const saved = localStorage.getItem('ikhi-theme');
+    const saved = localStorage.getItem('cross-dss-theme');
     return saved ? saved === 'dark' : true;
   });
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-    localStorage.setItem('ikhi-theme', isDark ? 'dark' : 'light');
+    localStorage.setItem('cross-dss-theme', isDark ? 'dark' : 'light');
   }, [isDark]);
 
   const toggleTheme = () => setIsDark(prev => !prev);
