@@ -15,7 +15,7 @@ export default function LoginPage({ onLogin }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState('login'); // login | mfa | success
-  const [mfaCode, setMfaCode] = useState('');
+  const [mfaDigits, setMfaDigits] = useState(['', '', '', '', '', '']);
   const [mfaExpected] = useState(() => String(Math.floor(100000 + Math.random() * 900000)));
   const [particles, setParticles] = useState([]);
   const [matchedUser, setMatchedUser] = useState(null);
@@ -23,7 +23,7 @@ export default function LoginPage({ onLogin }) {
 
   // Generate floating particles
   useEffect(() => {
-    const pts = Array.from({ length: 60 }, (_, i) => ({
+    const pts = Array.from({ length: 45 }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,
@@ -46,11 +46,11 @@ export default function LoginPage({ onLogin }) {
     resize();
     window.addEventListener('resize', resize);
 
-    const nodes = Array.from({ length: 40 }, () => ({
+    const nodes = Array.from({ length: 35 }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      vx: (Math.random() - 0.5) * 0.6,
-      vy: (Math.random() - 0.5) * 0.6,
+      vx: (Math.random() - 0.5) * 0.5,
+      vy: (Math.random() - 0.5) * 0.5,
       color: Math.random() > 0.5 ? '#00D4FF' : '#7B61FF',
     }));
 
@@ -66,8 +66,8 @@ export default function LoginPage({ onLogin }) {
           const dx = nodes[i].x - nodes[j].x;
           const dy = nodes[i].y - nodes[j].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 220) {
-            const alpha = 0.08 * (1 - dist / 220);
+          if (dist < 200) {
+            const alpha = 0.07 * (1 - dist / 200);
             ctx.beginPath();
             ctx.moveTo(nodes[i].x, nodes[i].y);
             ctx.lineTo(nodes[j].x, nodes[j].y);
@@ -77,12 +77,12 @@ export default function LoginPage({ onLogin }) {
           }
         }
         ctx.beginPath();
-        ctx.arc(nodes[i].x, nodes[i].y, 1.8, 0, Math.PI * 2);
+        ctx.arc(nodes[i].x, nodes[i].y, 1.5, 0, Math.PI * 2);
         ctx.fillStyle = nodes[i].color + '55';
         ctx.fill();
         // Outer glow
         ctx.beginPath();
-        ctx.arc(nodes[i].x, nodes[i].y, 4, 0, Math.PI * 2);
+        ctx.arc(nodes[i].x, nodes[i].y, 3.5, 0, Math.PI * 2);
         ctx.fillStyle = nodes[i].color + '15';
         ctx.fill();
       }
@@ -106,15 +106,42 @@ export default function LoginPage({ onLogin }) {
       setMatchedUser(user);
       setStep('mfa');
       setLoading(false);
-    }, 1200);
+    }, 1000);
   }, [email, password]);
+
+  const handleMfaDigitChange = (index, value) => {
+    const cleanValue = value.replace(/\D/g, '').slice(-1);
+    const newDigits = [...mfaDigits];
+    newDigits[index] = cleanValue;
+    setMfaDigits(newDigits);
+
+    // Auto focus next input
+    if (cleanValue && index < 5) {
+      const nextInput = document.getElementById(`mfa-input-${index + 1}`);
+      if (nextInput) nextInput.focus();
+    }
+  };
+
+  const handleMfaDigitKeyDown = (index, e) => {
+    // On backspace, focus previous input if current is empty
+    if (e.key === 'Backspace' && !mfaDigits[index] && index > 0) {
+      const prevInput = document.getElementById(`mfa-input-${index - 1}`);
+      if (prevInput) {
+        prevInput.focus();
+        const newDigits = [...mfaDigits];
+        newDigits[index - 1] = '';
+        setMfaDigits(newDigits);
+      }
+    }
+  };
 
   const handleMFA = useCallback((e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
+    const enteredCode = mfaDigits.join('');
     setTimeout(() => {
-      if (mfaCode === mfaExpected || mfaCode === '000000') {
+      if (enteredCode === mfaExpected || enteredCode === '000000') {
         setStep('success');
         setTimeout(() => {
           if (matchedUser) {
@@ -127,7 +154,7 @@ export default function LoginPage({ onLogin }) {
       }
       setLoading(false);
     }, 800);
-  }, [mfaCode, mfaExpected, matchedUser, onLogin]);
+  }, [mfaDigits, mfaExpected, matchedUser, onLogin]);
 
   return (
     <div className="login-page">
@@ -136,10 +163,12 @@ export default function LoginPage({ onLogin }) {
       {/* Floating particles */}
       <div className="login-particles">
         {particles.map(p => (
-          <div key={p.id} className={`login-particle login-particle--${p.color}`} style={{
+          <div key={p.id} className="login-particle" style={{
             left: `${p.x}%`, top: `${p.y}%`,
             width: `${p.size}px`, height: `${p.size}px`,
             opacity: p.opacity,
+            background: p.color === 'cyan' ? '#00D4FF' : '#7B61FF',
+            boxShadow: `0 0 8px ${p.color === 'cyan' ? '#00D4FF' : '#7B61FF'}`,
             animationDuration: `${20 + p.delay * 4}s`,
             animationDelay: `${p.delay}s`,
           }} />
@@ -147,18 +176,17 @@ export default function LoginPage({ onLogin }) {
       </div>
 
       {/* Glow orbs */}
-      <div className="login-orb login-orb-1" />
-      <div className="login-orb login-orb-2" />
-      <div className="login-orb login-orb-3" />
+      <div className="login-orb login-orb-1" style={{ position: 'absolute', width: '300px', height: '300px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,212,255,0.08) 0%, rgba(0,0,0,0) 70%)', top: '10%', left: '10%', zIndex: 1, pointerEvents: 'none' }} />
+      <div className="login-orb login-orb-2" style={{ position: 'absolute', width: '400px', height: '400px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(123,97,255,0.08) 0%, rgba(0,0,0,0) 70%)', bottom: '10%', right: '10%', zIndex: 1, pointerEvents: 'none' }} />
 
       {/* Scan line */}
-      <div className="login-scanline" />
+      <div className="login-scanline" style={{ position: 'absolute', width: '100%', height: '2px', background: 'linear-gradient(90deg, rgba(0,212,255,0) 0%, rgba(0,212,255,0.15) 50%, rgba(0,212,255,0) 100%)', zIndex: 2, pointerEvents: 'none', animation: 'scanLine 8s linear infinite' }} />
 
-      <div className={`login-container ${step}`}>
+      <div className="login-card">
         {/* Logo Section */}
-        <div className="login-logo-section">
-          <div className="login-logo-ring">
-            <svg viewBox="0 0 90 90" width="90" height="90">
+        <div className="login-logo">
+          <div className="login-logo-icon">
+            <svg viewBox="0 0 90 90" width="48" height="48">
               <defs>
                 <linearGradient id="lgCyan" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stopColor="#00D4FF" />
@@ -169,88 +197,79 @@ export default function LoginPage({ onLogin }) {
                   <stop offset="0%" stopColor="#7B61FF" />
                   <stop offset="100%" stopColor="#00D4FF" />
                 </linearGradient>
-                <filter id="lgGlow"><feGaussianBlur stdDeviation="2" result="b" /><feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
+                <filter id="lgGlow"><feGaussianBlur stdDeviation="1.5" result="b" /><feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
               </defs>
-              {/* Outer shield ring */}
-              <circle cx="45" cy="45" r="42" fill="none" stroke="url(#lgCyan)" strokeWidth="1.2" filter="url(#lgGlow)" className="login-ring-anim" />
-              <circle cx="45" cy="45" r="36" fill="none" stroke="url(#lgPurple)" strokeWidth="0.5" opacity="0.3" className="login-ring-anim-r" />
               {/* Shield shape */}
-              <path d="M45 12 L66 24 L66 44 C66 58 56 68 45 75 C34 68 24 58 24 44 L24 24 Z" fill="none" stroke="url(#lgCyan)" strokeWidth="1.5" filter="url(#lgGlow)" opacity="0.9" />
-              <path d="M45 16 L62 26 L62 43 C62 55 54 64 45 70 C36 64 28 55 28 43 L28 26 Z" fill="rgba(0,212,255,0.06)" stroke="none" />
-              {/* Map/crosshair icon inside shield */}
-              <rect x="35" y="32" width="20" height="16" rx="2" fill="none" stroke="url(#lgCyan)" strokeWidth="1" opacity="0.8" />
-              <line x1="45" y1="30" x2="45" y2="50" stroke="#00D4FF" strokeWidth="0.5" opacity="0.5" />
-              <line x1="33" y1="40" x2="57" y2="40" stroke="#00D4FF" strokeWidth="0.5" opacity="0.5" />
-              <circle cx="42" cy="38" r="2" fill="#00D4FF" opacity="0.7" />
-              <circle cx="50" cy="42" r="1.5" fill="#7B61FF" opacity="0.7" />
-              <path d="M38 44 L42 38 L46 41 L52 36" fill="none" stroke="#00FF88" strokeWidth="0.8" opacity="0.6" />
+              <path d="M45 12 L66 24 L66 44 C66 58 56 68 45 75 C34 68 24 58 24 44 L24 24 Z" fill="rgba(0,212,255,0.05)" stroke="url(#lgCyan)" strokeWidth="2" filter="url(#lgGlow)" />
+              {/* Crosshair/Map symbol inside */}
+              <rect x="35" y="32" width="20" height="16" rx="2" fill="none" stroke="#7B61FF" strokeWidth="1.2" />
+              <line x1="45" y1="28" x2="45" y2="52" stroke="#00D4FF" strokeWidth="0.8" />
+              <line x1="30" y1="40" x2="60" y2="40" stroke="#00D4FF" strokeWidth="0.8" />
+              <circle cx="45" cy="40" r="3" fill="#00D4FF" />
             </svg>
           </div>
-          <h1 className="login-brand">CROSS-DSS</h1>
-          <p className="login-brand-sub">Cross-Sectoral Intelligence & Decision Support System</p>
-          <div className="login-secure-badge">
-            <span className="login-sec-dot" />
-            SECURE CHANNEL • TLS 1.3 ENCRYPTED
+          <h1 className="login-logo-title">CROSS-DSS</h1>
+          <p className="login-logo-sub">Cross-Sectoral Intelligence & Decision Support System</p>
+          <div style={{ marginTop: '8px', fontSize: '9px', color: '#00D4FF', letterSpacing: '1px', fontWeight: 'bold', background: 'rgba(0, 212, 255, 0.08)', padding: '2px 8px', borderRadius: '4px', border: '1px solid rgba(0, 212, 255, 0.2)' }}>
+            SECURE CHANNEL • TLS 1.3
           </div>
         </div>
 
         {/* Login Form */}
         {step === 'login' && (
           <form className="login-form" onSubmit={handleLogin}>
-            <h2 className="login-form-title">🔐 Autentikasi Diperlukan</h2>
-            <p className="login-form-sub">Masukkan kredensial untuk mengakses platform DSS</p>
-
-            <div className="login-field">
-              <label>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-                Email
-              </label>
-              <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="admin@cross-dss.id" required autoFocus autoComplete="email" />
+            <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+              <h2 style={{ fontSize: '14px', color: 'var(--text-bright)', fontWeight: '600' }}>🔐 Autentikasi Sistem</h2>
+              <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Gunakan kredensial terdaftar Anda</p>
             </div>
 
             <div className="login-field">
-              <label>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                Password
-              </label>
-              <div className="login-pass-wrap">
-                <input type={showPass ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required autoComplete="current-password" />
-                <button type="button" className="login-pass-toggle" onClick={() => setShowPass(!showPass)}>
-                  {showPass ? (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-                  ) : (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                  )}
-                </button>
-              </div>
+              <svg className="login-field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+              <input className="login-input" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Alamat Email" required autoFocus autoComplete="email" />
+            </div>
+
+            <div className="login-field">
+              <svg className="login-field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <input className="login-input" type={showPass ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} placeholder="Kata Sandi" required autoComplete="current-password" style={{ paddingRight: '40px' }} />
+              <button type="button" onClick={() => setShowPass(!showPass)} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
+                {showPass ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                )}
+              </button>
             </div>
 
             {error && <div className="login-error">⚠️ {error}</div>}
 
-            <button type="submit" className={`login-submit ${loading ? 'loading' : ''}`} disabled={loading}>
+            <button type="submit" className="login-btn" disabled={loading}>
               {loading ? (
-                <><span className="login-spinner" /> Authenticating...</>
+                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                  <span style={{ width: '14px', height: '14px', border: '2px solid rgba(255,255,255,0.2)', borderTopColor: '#fff', borderRadius: '50%', display: 'inline-block', animation: 'spin 1s linear infinite' }} />
+                  Mengotentikasi...
+                </span>
               ) : (
-                <>
+                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
                   Masuk ke Platform
-                </>
+                </span>
               )}
             </button>
 
-            <div className="login-demo-section">
-              <div className="login-demo-label">
-                <span className="login-demo-line" />
-                <span>Akun Demo</span>
-                <span className="login-demo-line" />
+            {/* Quick Demo Autocomplete */}
+            <div style={{ marginTop: '20px', borderTop: '1px solid var(--glass-border)', paddingTop: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '10px', color: 'var(--text-muted)', marginBottom: '12px' }}>
+                <span style={{ flex: 1, height: '1px', background: 'var(--glass-border)' }} />
+                <span>AKUN UJI COBA (KLIK UNTUK AUTOFIL)</span>
+                <span style={{ flex: 1, height: '1px', background: 'var(--glass-border)' }} />
               </div>
-              <div className="login-demo-users">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {validUsers.map(u => (
-                  <button key={u.email} type="button" className="login-demo-btn" onClick={() => { setEmail(u.email); setPassword(u.password); }}>
-                    <span className="login-demo-avatar">{u.avatar}</span>
-                    <span className="login-demo-info">
-                      <span className="login-demo-name">{u.name}</span>
-                      <span className="login-demo-role">{u.role}</span>
+                  <button key={u.email} type="button" onClick={() => { setEmail(u.email); setPassword(u.password); }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--glass-border)', borderRadius: '6px', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s', width: '100%' }} className="demo-user-selector-btn">
+                    <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'var(--accent-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 'bold', color: '#fff', flexShrink: 0 }}>{u.avatar}</span>
+                    <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
+                      <span style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{u.name}</span>
+                      <span style={{ fontSize: '9px', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{u.role}</span>
                     </span>
                   </button>
                 ))}
@@ -261,50 +280,54 @@ export default function LoginPage({ onLogin }) {
 
         {/* MFA Step */}
         {step === 'mfa' && (
-          <form className="login-form" onSubmit={handleMFA}>
-            <h2 className="login-form-title">🔒 Multi-Factor Authentication</h2>
-            <p className="login-form-sub">Kode verifikasi telah dikirim ke perangkat Anda</p>
+          <form className="login-form login-mfa" onSubmit={handleMFA}>
+            <h2 className="login-mfa-title">🔒 Multi-Factor Authentication</h2>
+            <p className="login-mfa-desc">Masukkan kode verifikasi 6-digit untuk melanjutkan</p>
 
-            <div className="login-mfa-user-info">
-              <div className="login-mfa-user-avatar">{matchedUser?.avatar || '??'}</div>
-              <div className="login-mfa-user-detail">
-                <span className="login-mfa-user-name">{matchedUser?.name}</span>
-                <span className="login-mfa-user-role">{matchedUser?.org}</span>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center', background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px', marginBottom: '18px', textAlign: 'left' }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--accent-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px', color: '#fff' }}>{matchedUser?.avatar || '??'}</div>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)' }}>{matchedUser?.name}</span>
+                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{matchedUser?.org}</span>
               </div>
             </div>
 
-            <div className="login-mfa-code-display">
-              <span className="login-mfa-label">Kode MFA (Demo)</span>
-              <span className="login-mfa-value">{mfaExpected}</span>
+            <div style={{ background: 'rgba(0, 212, 255, 0.05)', border: '1px dashed rgba(0, 212, 255, 0.2)', padding: '10px', borderRadius: '6px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
+              <span style={{ color: 'var(--text-secondary)' }}>Kode Verifikasi (Demo)</span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 'bold', color: 'var(--accent-primary)', fontSize: '14px' }}>{mfaExpected}</span>
             </div>
 
-            <div className="login-field">
-              <label>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/></svg>
-                Kode 6-Digit
-              </label>
-              <input
-                type="text"
-                value={mfaCode}
-                onChange={e => setMfaCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                placeholder="000000"
-                maxLength={6}
-                required
-                autoFocus
-                className="login-mfa-input"
-              />
+            <div className="login-mfa-inputs">
+              {mfaDigits.map((digit, idx) => (
+                <input
+                  key={idx}
+                  id={`mfa-input-${idx}`}
+                  type="text"
+                  pattern="[0-9]*"
+                  inputMode="numeric"
+                  className="login-mfa-digit"
+                  value={digit}
+                  maxLength={1}
+                  onChange={e => handleMfaDigitChange(idx, e.target.value)}
+                  onKeyDown={e => handleMfaDigitKeyDown(idx, e)}
+                  required
+                  autoFocus={idx === 0}
+                />
+              ))}
             </div>
 
             {error && <div className="login-error">⚠️ {error}</div>}
 
-            <button type="submit" className={`login-submit ${loading ? 'loading' : ''}`} disabled={loading}>
-              {loading ? <><span className="login-spinner" /> Verifying...</> : <>✅ Verifikasi & Akses</>}
+            <button type="submit" className="login-btn" disabled={loading}>
+              {loading ? <span>Memverifikasi...</span> : <span>✅ Verifikasi & Masuk</span>}
             </button>
 
-            <div className="login-hint"><span>💡 Masukkan kode di atas, atau gunakan <code>000000</code></span></div>
+            <div style={{ marginTop: '14px', fontSize: '10.5px', color: 'var(--text-muted)', textAlign: 'center' }}>
+              <span>💡 Gunakan kode di atas atau <code>000000</code> untuk bypass</span>
+            </div>
 
-            <button type="button" className="login-back-btn" onClick={() => { setStep('login'); setError(''); setMfaCode(''); }}>
-              ← Kembali ke Login
+            <button type="button" onClick={() => { setStep('login'); setError(''); setMfaDigits(['', '', '', '', '', '']); }} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '12px', cursor: 'pointer', marginTop: '16px', textDecoration: 'underline', width: '100%', textAlign: 'center' }}>
+              ← Kembali ke Form Login
             </button>
           </form>
         )}
@@ -312,35 +335,41 @@ export default function LoginPage({ onLogin }) {
         {/* Success Animation */}
         {step === 'success' && (
           <div className="login-success">
-            <div className="login-success-icon">
-              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#00FF88" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <div className="login-success-icon" style={{ color: '#00FF88' }}>
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                 <polyline points="22 4 12 14.01 9 11.01" />
               </svg>
             </div>
-            <h2>Authentication Successful</h2>
-            <p>Initializing Cross-DSS Platform...</p>
-            <div className="login-success-user">
-              <span>{matchedUser?.name}</span>
-              <span>{matchedUser?.role}</span>
+            <h2 className="login-success-text">Autentikasi Berhasil</h2>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '4px' }}>Memuat modul Cross-DSS...</p>
+            
+            <div style={{ margin: '16px 0', padding: '10px 14px', background: 'rgba(255,255,255,0.03)', borderRadius: '6px', display: 'inline-block', minWidth: '180px' }}>
+              <div style={{ fontWeight: '600', fontSize: '13px', color: 'var(--text-primary)' }}>{matchedUser?.name}</div>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{matchedUser?.role}</div>
             </div>
-            <div className="login-progress-bar"><div className="login-progress-fill" /></div>
-            <div className="login-loading-modules">
-              <span className="login-module-item login-module-anim-1">Loading GIS Engine...</span>
-              <span className="login-module-item login-module-anim-2">Syncing Layer Data...</span>
-              <span className="login-module-item login-module-anim-3">Initializing AI/DSS...</span>
+
+            {/* Fake progress bar */}
+            <div style={{ height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', overflow: 'hidden', margin: '20px auto', width: '90%' }}>
+              <div className="login-progress-fill" style={{ height: '100%', width: '0%', background: 'var(--accent-gradient)', animation: 'spin 2s ease-in-out forwards' }} />
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11px', color: 'var(--text-muted)', textAlign: 'left', width: '80%', margin: '0 auto' }}>
+              <span className="login-module-item">✓ GIS Engine Initialized</span>
+              <span className="login-module-item">✓ Spatial Data Cache Sync Finished</span>
+              <span className="login-module-item">✓ AI Analytics Model Ready</span>
             </div>
           </div>
         )}
 
         {/* Footer */}
         <div className="login-footer">
-          <div className="login-footer-brand">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginBottom: '4px' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" strokeWidth="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
             <span>PT. NUSATEK</span>
           </div>
-          <p className="login-footer-copy">© 2026 Cross-Sectoral Decision Support System</p>
-          <p className="login-footer-classify">RESTRICTED — Akses Hanya untuk Pengguna Terotorisasi</p>
+          <p style={{ margin: 0 }}>© 2026 Cross-Sectoral Decision Support System</p>
+          <p style={{ margin: '2px 0 0 0', color: 'var(--alert-conflict)', letterSpacing: '0.5px' }}>RESTRICTED ACCESS ONLY</p>
         </div>
       </div>
     </div>
